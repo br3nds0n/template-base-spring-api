@@ -27,7 +27,7 @@ public class Usuario {
     @Column(nullable = false)
     private Boolean emailVerificado = false;
 
-    private String password;
+    private String senha;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
