@@ -1,5 +1,6 @@
 package br.com.template.base.controllers;
 
+import br.com.template.base.DTOs.request.CodigoConfirmacaoRequestDTO;
 import br.com.template.base.DTOs.request.LoginRequestDTO;
 import br.com.template.base.DTOs.request.SignUpRequestDTO;
 import br.com.template.base.DTOs.response.ApiResponseDTO;
@@ -43,5 +44,12 @@ public class AuthController extends AbstractController {
 
         usuarioService.criarUsuario(mapearDTO(signUpRequestDto, Usuario.class));
         return new ResponseEntity<>(new ApiResponseDTO(true, "Usuário criado com sucesso!"), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/ativar-conta")
+    @Operation(tags = "Auth", summary = "Ativa conta do usuário")
+    public ResponseEntity<ApiResponseDTO> activateUserAccount(@RequestBody CodigoConfirmacaoRequestDTO codigo) {
+        usuarioService.ativarConta(codigo);
+        return new ResponseEntity<>(new ApiResponseDTO(true, "Conta verificada com sucesso!"), HttpStatus.OK);
     }
 }

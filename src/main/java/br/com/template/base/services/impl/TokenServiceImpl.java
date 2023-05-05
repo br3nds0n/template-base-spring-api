@@ -15,6 +15,7 @@ import java.time.Duration;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.function.Function;
 
 @Slf4j
@@ -73,6 +74,8 @@ public class TokenServiceImpl implements TokenService {
         jwtToken.setValor(tokenValor);
         jwtToken.setUsuario(usuario);
         jwtToken.setTokenTipo(tokenTipo);
+
+        if (Boolean.FALSE.equals(usuario.getEmailVerificado())) jwtToken.setCodigoVerificacao(new Random().nextLong(900000) + 100000);
 
         return tokenRepository.save(jwtToken);
     }

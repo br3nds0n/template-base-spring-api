@@ -21,6 +21,7 @@ public class JwtToken {
     private TokenEnum tokenTipo;
 
     private String valor;
+    private Long codigoVerificacao;
 
     @ManyToOne(targetEntity = Usuario.class, fetch = FetchType.EAGER)
     @JoinColumn(nullable = false, name = "usuario_id")

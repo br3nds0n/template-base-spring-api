@@ -13,4 +13,5 @@ public interface TokenRepository extends JpaRepository<JwtToken, Long> {
 
     Optional<JwtToken> findByUsuario(Usuario usuario);
     Optional<JwtToken> findByValorAndTokenTipo(String value, TokenEnum tokenEnum);
+    Optional<JwtToken> findByCodigoVerificacaoAndTokenTipo(Long codigo, TokenEnum tokenEnum);
 }
