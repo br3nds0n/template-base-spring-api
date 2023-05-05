@@ -5,6 +5,7 @@ import br.com.template.base.models.Usuario;
 
 public interface TokenService {
 
+   String obterEmailpeloToken(String token);
    String criarValorTokenJwt(Usuario usuario);
    JwtToken criarToken(Usuario user);
    boolean validarJwtToken(String jwtToken);

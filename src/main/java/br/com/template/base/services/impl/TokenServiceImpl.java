@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 @Slf4j
 @Service
@@ -46,6 +47,20 @@ public class TokenServiceImpl implements TokenService {
                 .setIssuer("spring template")
                 .signWith(SignatureAlgorithm.HS512, secret)
                 .compact();
+    }
+
+    private Claims obterTodasClaimsPeloToken(String token) {
+        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+    }
+
+    private <T> T obterClaimPeloToken(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = obterTodasClaimsPeloToken(token);
+        return claimsResolver.apply(claims);
+    }
+
+    @Override
+    public String obterEmailpeloToken(String token) {
+        return obterClaimPeloToken(token, Claims::getSubject);
     }
 
     @Override
