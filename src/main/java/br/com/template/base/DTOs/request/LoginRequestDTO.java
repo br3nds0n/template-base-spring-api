@@ -14,5 +14,5 @@ public class LoginRequestDTO {
     private String email;
 
     @NotBlank(message = "Senha não pode ser vazia!")
-    private String password;
+    private String senha;
 }

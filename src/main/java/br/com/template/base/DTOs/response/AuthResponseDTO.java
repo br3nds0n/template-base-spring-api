@@ -8,7 +8,5 @@ import lombok.Setter;
 public class AuthResponseDTO {
 
     private String accessToken;
-    private Boolean twoFactorRequired;
     private String tokenType = "Bearer";
-    private String message;
 }

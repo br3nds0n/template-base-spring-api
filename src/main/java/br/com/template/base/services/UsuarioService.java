@@ -5,4 +5,5 @@ import br.com.template.base.models.Usuario;
 public interface UsuarioService {
 
     Usuario criarUsuario(Usuario usuario);
+    Usuario obterUsuarioPorEmail(String email);
 }

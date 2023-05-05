@@ -5,6 +5,7 @@ import br.com.template.base.DTOs.request.SignUpRequestDTO;
 import br.com.template.base.DTOs.response.ApiResponseDTO;
 import br.com.template.base.DTOs.response.AuthResponseDTO;
 import br.com.template.base.models.Usuario;
+import br.com.template.base.services.AuthService;
 import br.com.template.base.services.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -20,17 +21,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/auth")
 public class AuthController extends AbstractController {
 
+    private final AuthService authService;
     private final UsuarioService usuarioService;
 
-    protected AuthController(ModelMapper modelMapper, UsuarioService usuarioService) {
+    protected AuthController(ModelMapper modelMapper, AuthService authService, UsuarioService usuarioService) {
         super(modelMapper);
+        this.authService = authService;
         this.usuarioService = usuarioService;
     }
 
     @PostMapping("/login")
+    @Operation(tags = "Auth", summary = "Autenticar usuário")
     public ResponseEntity<AuthResponseDTO> authenticateUser(@Valid @RequestBody LoginRequestDTO loginRequestDto) {
 
-        return new ResponseEntity<>(new AuthResponseDTO(), HttpStatus.CREATED);
+        return new ResponseEntity<>(authService.login(loginRequestDto), HttpStatus.OK);
     }
 
     @PostMapping("/signup")

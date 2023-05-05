@@ -1,6 +1,7 @@
 package br.com.template.base.services.impl;
 
 import br.com.template.base.enums.Role;
+import br.com.template.base.exceptions.NotFoundException;
 import br.com.template.base.models.Usuario;
 import br.com.template.base.repositories.UsuarioRepository;
 import br.com.template.base.services.UsuarioService;
@@ -26,5 +27,10 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
 
         return usuarioRepository.save(usuario);
+    }
+
+    @Override
+    public Usuario obterUsuarioPorEmail(String email) {
+        return usuarioRepository.findByEmail(email).orElseThrow(() -> new NotFoundException("Usuario não encontrado!"));
     }
 }
