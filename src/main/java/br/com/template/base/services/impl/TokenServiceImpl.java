@@ -1,5 +1,6 @@
 package br.com.template.base.services.impl;
 
+import br.com.template.base.enums.TokenEnum;
 import br.com.template.base.models.JwtToken;
 import br.com.template.base.models.Usuario;
 import br.com.template.base.repositories.TokenRepository;
@@ -10,12 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.Date;
 import java.util.HashMap;
@@ -29,16 +24,15 @@ public class TokenServiceImpl implements TokenService {
     @Value("${jwt.secret}")
     private String secret;
 
-    private static final Duration EXPIRA_EM = Duration.ofHours(30000);
     private final TokenRepository tokenRepository;
 
     public TokenServiceImpl(TokenRepository tokenRepository) {
         this.tokenRepository = tokenRepository;
     }
 
-    private String criarValorTokenJwt(Usuario usuario, Map<String, Object> claims) {
+    private String criarValorTokenJwt(Usuario usuario, Duration expiraEm, Map<String, Object> claims) {
         Date agora = new Date();
-        Date dataExpiracao = new Date(agora.getTime() + EXPIRA_EM.toMillis());
+        Date dataExpiracao = new Date(agora.getTime() + expiraEm.toMillis());
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(usuario.getNome())
@@ -64,19 +58,21 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public String criarValorTokenJwt(Usuario usuario) {
+    public String criarValorTokenJwt(Usuario usuario, Duration expiraEm) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("roles", usuario.getRole());
-        return criarValorTokenJwt(usuario, claims);
+        return criarValorTokenJwt(usuario, expiraEm, claims);
     }
 
     @Override
     @Transactional
-    public JwtToken criarToken(Usuario usuario) {
-        String tokenValor = criarValorTokenJwt(usuario);
+    public JwtToken criarToken(Usuario usuario, Duration expiraEm, TokenEnum tokenTipo) {
+        String tokenValor = criarValorTokenJwt(usuario, expiraEm);
+
         JwtToken jwtToken = new JwtToken();
         jwtToken.setValor(tokenValor);
         jwtToken.setUsuario(usuario);
+        jwtToken.setTokenTipo(tokenTipo);
 
         return tokenRepository.save(jwtToken);
     }

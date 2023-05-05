@@ -1,6 +1,6 @@
 package br.com.template.base.models;
 
-import br.com.template.base.enums.Role;
+import br.com.template.base.enums.RoleEnum;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,7 +31,7 @@ public class Usuario {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Role role;
+    private RoleEnum role;
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
     private List<JwtToken> jwtTokens;
