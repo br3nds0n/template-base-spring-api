@@ -9,6 +9,7 @@ import br.com.template.base.models.JwtToken;
 import br.com.template.base.models.Usuario;
 import br.com.template.base.repositories.TokenRepository;
 import br.com.template.base.repositories.UsuarioRepository;
+import br.com.template.base.services.EmailService;
 import br.com.template.base.services.TokenService;
 import br.com.template.base.services.UsuarioService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,12 +22,14 @@ import java.util.Optional;
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
 
+    private final EmailService emailService;
     private final TokenService tokenService;
     private final PasswordEncoder passwordEncoder;
-    private final UsuarioRepository usuarioRepository;
     private final TokenRepository tokenRepository;
+    private final UsuarioRepository usuarioRepository;
 
-    public UsuarioServiceImpl(TokenService tokenService, UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, TokenRepository tokenRepository) {
+    public UsuarioServiceImpl(EmailService emailService, TokenService tokenService, UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, TokenRepository tokenRepository) {
+        this.emailService = emailService;
         this.tokenService = tokenService;
         this.passwordEncoder = passwordEncoder;
         this.usuarioRepository = usuarioRepository;
@@ -42,9 +45,20 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         usuarioRepository.save(usuario);
 
-        tokenService.criarToken(usuario, Duration.of(60000, ChronoUnit.MILLIS ), TokenEnum.ATIVAR_CONTA);
+        JwtToken jwtToken = tokenService.criarToken(usuario, Duration.of(60000, ChronoUnit.MILLIS ), TokenEnum.ATIVAR_CONTA);
+
+        emailService.enviarEmail(
+                usuario.getEmail(),
+                "Ativar Conta",
+                 "Codigo de verificação: " + jwtToken.getCodigoVerificacao()
+        );
 
         return usuario;
+    }
+
+    @Override
+    public Usuario obterUsuarioPorId(Long id) {
+        return usuarioRepository.findById(id).orElseThrow(() -> new NotFoundException("Usuario não encontrado!"));
     }
 
     @Override

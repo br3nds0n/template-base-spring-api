@@ -9,13 +9,12 @@ import io.jsonwebtoken.*;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.function.Function;
 
 @Slf4j
@@ -61,7 +60,11 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public String criarValorTokenJwt(Usuario usuario, Duration expiraEm) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("roles", usuario.getRole());
+        List<String> roles = new ArrayList<>();
+
+        roles.add(usuario.getRole().toString());
+        claims.put("roles", roles);
+
         return criarValorTokenJwt(usuario, expiraEm, claims);
     }
 

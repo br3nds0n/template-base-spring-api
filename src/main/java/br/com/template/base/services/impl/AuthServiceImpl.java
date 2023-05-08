@@ -98,12 +98,6 @@ public class AuthServiceImpl implements AuthService {
         return tokenService.criarValorTokenJwt(user, Duration.of(300000, ChronoUnit.MILLIS));
     }
 
-    @Override
-    public AuthResponseDTO login(LoginRequestDTO loginRequest) {
-        Usuario userPrincipal = obterUsuarioPrincipal(loginRequest.getEmail(), loginRequest.getSenha());
-        return login(userPrincipal);
-    }
-
     public Optional<JwtToken> obterRefreshToken() {
         HttpServletRequest request = Optional.ofNullable((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
                 .map(ServletRequestAttributes::getRequest).orElseThrow(IllegalStateException::new);
@@ -115,16 +109,24 @@ public class AuthServiceImpl implements AuthService {
         }
         return Optional.empty();
     }
+
+    @Override
+    public AuthResponseDTO login(LoginRequestDTO loginRequest) {
+        Usuario userPrincipal = obterUsuarioPrincipal(loginRequest.getEmail(), loginRequest.getSenha());
+        return login(userPrincipal);
+    }
+
     @Override
     public void logout(Usuario usuario) {
         Optional<JwtToken> optionalRefreshToken = obterRefreshToken();
 
-        if (optionalRefreshToken.isPresent() && optionalRefreshToken.get().getUsuario().getId().equals(usuario.getId())) {
-            tokenService.deletarToken(optionalRefreshToken.get());
-            removerRefreshToken();
-        } else {
-            throw new BadRequestException("tokenExpired");
-        }
+        JwtToken refreshToken = optionalRefreshToken
+                .orElseThrow(() -> new BadRequestException("tokenExpired"));
 
+        if (!refreshToken.getUsuario().getId().equals(usuario.getId()))
+            throw new BadRequestException("tokenExpired");
+
+        tokenService.deletarToken(refreshToken);
+        removerRefreshToken();
     }
 }

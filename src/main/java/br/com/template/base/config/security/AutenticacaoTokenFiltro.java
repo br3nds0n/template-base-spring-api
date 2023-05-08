@@ -2,6 +2,7 @@ package br.com.template.base.config.security;
 
 import br.com.template.base.services.DetalhesUsuarioService;
 import br.com.template.base.services.TokenService;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,9 +38,17 @@ public class AutenticacaoTokenFiltro extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String jwt = obterAcessoJwt(request).orElse(null);
-        if (jwt != null && tokenService.validarJwtToken(jwt)) {
-            String email = tokenService.obterEmailpeloToken(jwt);
+        String email = null;
+                String jwt = obterAcessoJwt(request).orElse(null);
+        if (jwt != null) {
+            try {
+                 email = tokenService.obterEmailpeloToken(jwt);
+            } catch (IllegalArgumentException e) {
+                System.out.println("Nao foi possível obter o token JWT");
+            } catch (ExpiredJwtException e) {
+                System.out.println("O token JWT expirou");
+            }
+
             UserDetails userDetails = detalhesUsuarioService.loadUserByUsername(email);
 
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

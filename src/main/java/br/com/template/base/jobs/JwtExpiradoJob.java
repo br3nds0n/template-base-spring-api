@@ -23,7 +23,7 @@ public class JwtExpiradoJob {
 
     @Scheduled(fixedDelayString = "30000")
     public void deletarTokensExpirados() {
-        log.info("JOB: deletar tokens expirados");
+        log.warn("JOB: deletar tokens expirados");
 
         List<JwtToken> expiredTokens = tokenRepository
                 .findAll()

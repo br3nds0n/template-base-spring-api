@@ -28,10 +28,10 @@ public class GlobalExceptionController {
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public ResponseEntity<MensagemErroDTO> methodArgumentNotValidException(MethodArgumentNotValidException ex) {
         List<String> errors = new ArrayList<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String errorMessage = error.getDefaultMessage();
-            errors.add(errorMessage);
-        });
+
+        ex.getBindingResult()
+                .getAllErrors()
+                .forEach(error -> errors.add(error.getDefaultMessage()));
 
         return new ResponseEntity<>(new MensagemErroDTO(HttpStatus.BAD_REQUEST.value(), errors, "Erro de validação"), HttpStatus.BAD_REQUEST);
     }
