@@ -45,13 +45,16 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         usuarioRepository.save(usuario);
 
-        JwtToken jwtToken = tokenService.criarToken(usuario, Duration.of(60000, ChronoUnit.MILLIS ), TokenEnum.ATIVAR_CONTA);
+        tokenService.criarToken(usuario, Duration.of(60000, ChronoUnit.MILLIS ), TokenEnum.ATIVAR_CONTA);
 
-        emailService.enviarEmail(
-                usuario.getEmail(),
-                "Ativar Conta",
-                 "Codigo de verificação: " + jwtToken.getCodigoVerificacao()
-        );
+//                              ⚠️ habilitar quando estiver fazendo a confirmação de e-mail ⚠️
+//        JwtToken jwtToken = tokenService.criarToken(usuario, Duration.of(60000, ChronoUnit.MILLIS ), TokenEnum.ATIVAR_CONTA);
+//
+//        emailService.enviarEmail(
+//                usuario.getEmail(),
+//                "Ativar Conta",
+//                 "Codigo de verificação: " + jwtToken.getCodigoVerificacao()
+//        );
 
         return usuario;
     }

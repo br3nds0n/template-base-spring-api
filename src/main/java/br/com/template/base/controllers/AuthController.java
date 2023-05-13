@@ -7,28 +7,35 @@ import br.com.template.base.DTOs.response.ApiResponseDTO;
 import br.com.template.base.DTOs.response.AuthResponseDTO;
 import br.com.template.base.models.Usuario;
 import br.com.template.base.services.AuthService;
+import br.com.template.base.services.TokenService;
 import br.com.template.base.services.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController extends AbstractController {
 
     private final AuthService authService;
+    private final TokenService tokenService;
     private final UsuarioService usuarioService;
 
-    protected AuthController(ModelMapper modelMapper, AuthService authService, UsuarioService usuarioService) {
+    protected AuthController(ModelMapper modelMapper, AuthService authService, UsuarioService usuarioService, TokenService tokenService) {
         super(modelMapper);
         this.authService = authService;
+        this.tokenService = tokenService;
         this.usuarioService = usuarioService;
+    }
+
+    @GetMapping("/validarToken/{token}")
+    @Operation(tags = "Auth", summary = "Validar token")
+    public ResponseEntity<ApiResponseDTO> validarToken(@PathVariable String token) {
+        boolean valido = tokenService.validarJwtToken(token);
+        return new ResponseEntity<>(new ApiResponseDTO(valido, valido ? "Token inválido" : "Token válido"), HttpStatus.OK);
     }
 
     @PostMapping("/login")

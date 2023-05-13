@@ -10,7 +10,6 @@ import br.com.template.base.repositories.TokenRepository;
 import br.com.template.base.services.AuthService;
 import br.com.template.base.services.TokenService;
 import br.com.template.base.services.UsuarioService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,7 +20,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Optional;
 import java.util.TimeZone;
@@ -90,24 +88,16 @@ public class AuthServiceImpl implements AuthService {
 
     private AuthResponseDTO login(Usuario userPrincipal) {
         Usuario usuario = usuarioService.obterUsuarioPorEmail(userPrincipal.getEmail());
-        if (Boolean.FALSE.equals(usuario.getEmailVerificado())) throw new BadRequestException("Usuario não confirmou o E-mail!");
+
+//        ⚠️ habilitar quando estiver fazendo a confirmação de e-mail ⚠️
+//        if (Boolean.FALSE.equals(usuario.getEmailVerificado()))
+//            throw new BadRequestException("Usuario não confirmou o E-mail!");
+
         return obterAuthResponse(usuario);
     }
 
     public String criarAccessToken(Usuario user) {
         return tokenService.criarValorTokenJwt(user, Duration.of(300000, ChronoUnit.MILLIS));
-    }
-
-    public Optional<JwtToken> obterRefreshToken() {
-        HttpServletRequest request = Optional.ofNullable((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
-                .map(ServletRequestAttributes::getRequest).orElseThrow(IllegalStateException::new);
-        if (request.getCookies() != null) {
-            return Arrays.stream(request.getCookies())
-                    .filter(cookie -> REFRESH_TOKEN_COOKIE_NAME.equals(cookie.getName()))
-                    .findFirst()
-                    .flatMap(cookie -> tokenRepository.findByValorAndTokenTipo(cookie.getValue(), TokenEnum.REFRESH));
-        }
-        return Optional.empty();
     }
 
     @Override
@@ -118,15 +108,12 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void logout(Usuario usuario) {
-        Optional<JwtToken> optionalRefreshToken = obterRefreshToken();
-
-        JwtToken refreshToken = optionalRefreshToken
-                .orElseThrow(() -> new BadRequestException("tokenExpired"));
-
-        if (!refreshToken.getUsuario().getId().equals(usuario.getId()))
+        Optional<JwtToken> optionalRefreshToken = tokenRepository.findByUsuario(usuario);
+        if (optionalRefreshToken.isPresent() && optionalRefreshToken.get().getUsuario().getId().equals(usuario.getId())) {
+            tokenService.deletarToken(optionalRefreshToken.get());
+            removerRefreshToken();
+        } else {
             throw new BadRequestException("tokenExpired");
-
-        tokenService.deletarToken(refreshToken);
-        removerRefreshToken();
+        }
     }
 }
